@@ -12,7 +12,7 @@ import InterviewReport from './pages/InterviewReport';
 
 
 
-export const ServerUrl = ("http://localhost:8000").replace(/\/$/, "")
+export const ServerUrl = ("https://a-i-interview.onrender.com").replace(/\/$/, "")
 
 const App = () => {
 
