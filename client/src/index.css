@@ -1,0 +1,52 @@
+@import 'tailwindcss';
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    color: #111827;
+    background: #f3f3f3;
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  :focus-visible {
+    outline: 3px solid rgba(34, 197, 94, 0.35);
+    outline-offset: 3px;
+  }
+}
+
+@layer utilities {
+  .app-panel {
+    @apply rounded-2xl border border-gray-200 bg-white shadow-sm;
+  }
+
+  .app-button-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:opacity-90 disabled:bg-gray-500;
+  }
+
+  .app-button-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-800 shadow-sm transition hover:bg-gray-50;
+  }
+}
