@@ -12,7 +12,7 @@ import InterviewReport from './pages/InterviewReport';
 
 
 
-export const ServerUrl = import.meta.env.VITE_SERVER_URL
+export const ServerUrl = "http://localhost:8000"
 
 const App = () => {
 

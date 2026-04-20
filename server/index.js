@@ -11,10 +11,10 @@ import paymentRouter from './routes/paymentRoute.js';
 dotenv.config();
 
 const app = express();
-const clientUrl = process.env.CLIENT_URL?.replace(/\/$/, '');
+
 
 app.use(cors({
-   origin: clientUrl,
+   origin: "http://localhost:5173",
    credentials: true,
 }));
 
