@@ -15,7 +15,7 @@ const app = express();
 
 app.use(cors({
    origin:
-   "http://localhost:5173",
+   "https://a-i-interview-client.onrender.com",
    credentials: true,
 }));
 
