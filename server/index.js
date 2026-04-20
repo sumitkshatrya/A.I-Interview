@@ -14,9 +14,8 @@ const app = express();
 
 
 app.use(cors({
-   origin:[ 
+   origin:
    "http://localhost:5173",
-   "https://a-i-interview-client.onrender.com"],
    credentials: true,
 }));
 
@@ -28,6 +27,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use('/api/interview', interviewRouter)
 app.use("/api/payment", paymentRouter)
+
 
 const PORT = process.env.PORT || 8000;
  app.listen(PORT, () =>{
