@@ -1,23 +1,23 @@
-import { BsRobot } from 'react-icons/bs'
-import { IoSparkles } from 'react-icons/io5'
-import { FcGoogle } from 'react-icons/fc'
-import { motion as Motion } from 'framer-motion'
-import { auth, provider } from '../utils/firebase'
-import { signInWithPopup } from 'firebase/auth'
-import axios from 'axios'
-import { ServerUrl } from '../App'
-import { useDispatch } from 'react-redux'
-import { setUserData } from '../redux/userSlice'
-import { useNavigate } from 'react-router-dom'
+import { BsRobot } from 'react-icons/bs';
+import { IoSparkles } from 'react-icons/io5';
+import { FcGoogle } from 'react-icons/fc';
+import { motion as Motion } from 'framer-motion';
+import { auth, provider } from '../utils/firebase';
+import { signInWithPopup } from 'firebase/auth';
+import axios from 'axios';
+import { ServerUrl } from '../App';
+import { useDispatch } from 'react-redux';
+import { setUserData } from '../redux/userSlice';
+import { useNavigate } from 'react-router-dom';
 
-const Auth = ({ isModel = false }) => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
+const Auth = ({ isModel = false, onClose }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleGoogleAuth = async () => {
     try {
-      const response = await signInWithPopup(auth, provider)
-      const user = response.user
+      const response = await signInWithPopup(auth, provider);
+      const user = response.user;
 
       const result = await axios.post(
         ServerUrl + '/api/auth/google-login',
@@ -26,57 +26,81 @@ const Auth = ({ isModel = false }) => {
           email: user.email,
         },
         { withCredentials: true }
-      )
+      );
 
-      dispatch(setUserData(result.data))
-      if (!isModel) {
-        navigate('/')
+      const userObj = result.data?.data || result.data?.user || result.data;
+      dispatch(setUserData(userObj));
+
+      if (isModel && onClose) {
+        onClose();
+      } else {
+        navigate('/');
       }
     } catch (error) {
-      console.log(error)
-      dispatch(setUserData(null))
+      console.log("Google Login Error:", error);
+      dispatch(setUserData(null));
     }
-  }
+  };
 
   return (
-    <div className={`w-full ${isModel ? 'py-4' : 'min-h-screen bg-[#f3f3f3] flex items-center justify-center px-6 py-20'}`}>
+    <div className={`w-full ${isModel ? '' : 'min-h-screen bg-[#0B0F17] flex items-center justify-center px-4 py-12'}`}>
       <Motion.div
-        initial={{ opacity: 0, y: -24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: 'easeOut' }}
-        className={`w-full ${isModel ? 'max-w-md p-8' : 'max-w-lg p-8 sm:p-12'} rounded-2xl bg-white shadow-xl border border-gray-200`}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        className={`w-full ${
+          isModel ? 'max-w-md p-6 sm:p-8' : 'max-w-md p-8 sm:p-10'
+        } rounded-3xl bg-slate-900/95 border border-slate-800/90 shadow-2xl backdrop-blur-xl text-center space-y-6`}
       >
-        <div className='flex items-center justify-center gap-3 mb-6'>
-          <div className='bg-black text-white p-2 rounded-lg'>
-            <BsRobot size={18} />
+        {/* Brand Icon Header */}
+        <div className="flex items-center justify-center gap-2.5">
+          <div className="p-2.5 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+            <BsRobot size={22} />
           </div>
-          <h1 className='text-lg font-semibold'>AI Interview</h1>
+          <h1 className="font-extrabold text-lg tracking-tight">
+            <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+              SK
+            </span>
+            <span className="text-white"> Interview </span>
+            <span className="text-emerald-400">AI</span>
+          </h1>
         </div>
 
-        <h1 className='text-2xl md:text-3xl font-semibold text-center leading-snug mb-4'>
-          Continue with{' '}
-          <span className='bg-green-100 text-green-600 px-3 py-1 rounded-full inline-flex items-center gap-2'>
-            <IoSparkles size={16} />
-            AI Smart Interview
-          </span>
-        </h1>
+        {/* Title */}
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+            <IoSparkles size={14} className="text-emerald-400 animate-pulse" />
+            <span>AI Smart Interview Platform</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-snug">
+            Welcome to Your AI Career Coach
+          </h2>
+        </div>
 
-        <p className='text-gray-500 text-center text-sm md:text-base leading-relaxed mb-8'>
-          Sign in to practice AI mock interviews, get real-time feedback, track your progress, and improve your interview confidence.
+        {/* Subtitle Description */}
+        <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xs mx-auto">
+          Sign in to practice real-time AI mock interviews, get instant feedback, and accelerate your prep.
         </p>
 
-        <Motion.button
-          onClick={handleGoogleAuth}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          className='w-full flex items-center justify-center gap-3 py-3 rounded-full shadow-md font-medium bg-green-600 text-white hover:bg-green-700 transition-colors duration-300'
-        >
-          <FcGoogle size={20} />
-          Continue with Google
-        </Motion.button>
+        {/* Google Authentication Button */}
+        <div className="pt-2">
+          <Motion.button
+            onClick={handleGoogleAuth}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-2xl font-bold bg-white text-slate-950 hover:bg-slate-100 transition-all shadow-xl text-xs sm:text-sm cursor-pointer border border-slate-200"
+          >
+            <FcGoogle size={22} />
+            <span>Continue with Google</span>
+          </Motion.button>
+        </div>
+
+        <p className="text-[10px] text-slate-500 pt-1">
+          By continuing, you agree to our Terms of Service & Privacy Policy.
+        </p>
       </Motion.div>
     </div>
-  )
-}
+  );
+};
 
-export default Auth
+export default Auth;

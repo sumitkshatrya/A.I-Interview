@@ -12,7 +12,7 @@ const Interview = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex flex-col">
       {
         step===1 && (
           <RoleAndExperience onStart={(data)=>{setInterviewData(data);

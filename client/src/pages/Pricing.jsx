@@ -1,56 +1,65 @@
-import { useState } from 'react'
-import axios from 'axios'
-import { motion as Motion } from 'framer-motion'
-import { FaArrowLeft, FaCheckCircle } from 'react-icons/fa'
-import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
-import { ServerUrl } from '../App'
-import { setUserData } from '../redux/userSlice'
+import { useState } from 'react';
+import axios from 'axios';
+import { motion as Motion } from 'framer-motion';
+import { FaArrowLeft, FaCheckCircle, FaLock } from 'react-icons/fa';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { ServerUrl } from '../App';
+import { setUserData } from '../redux/userSlice';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import AuthModel from '../components/AuthModel';
 
 const plans = [
   {
     id: 'free',
-    name: 'Free',
-    price: 'Rs. 0',
+    name: 'Free Tier',
+    price: '₹0',
+    amount: 0,
     credits: 100,
-    description: 'Perfect for beginners starting interview preparations.',
+    description: 'Perfect for initial mock interview evaluation and resume parsing.',
     features: [
       '100 AI Interview Credits',
       'Basic Performance Report',
       'Voice Interview Access',
       'Limited History Tracking',
     ],
-    badge: 'Default',
+    badge: 'Starter',
     default: true,
   },
   {
     id: 'basic',
-    name: 'Starter Pack',
-    price: 'Rs. 100',
-    credits: 1500,
-    description: 'Great for focused practice and skill improvement.',
+    name: 'Pro Tech Developer',
+    price: '₹100',
+    amount: 100,
+    credits: 500,
+    description: 'Designed for active job seekers targeting US tech roles.',
     features: [
-      '1500 AI Interview Credits',
-      'Detailed Feedback',
-      'Performance Analytics',
+      '500 AI Interview Credits',
+      'Detailed Multi-Dimensional Feedback',
+      'Skill Graph Mastery Hierarchy',
       'Full Interview History',
+      'ATS Resume Optimization Exporter',
     ],
+    badge: 'Standard',
   },
   {
     id: 'pro',
-    name: 'Pro Pack',
-    price: 'Rs. 500',
-    credits: 6500,
-    description: 'Best value for serious job preparation.',
+    name: 'FAANG & Senior Executive',
+    price: '₹249',
+    amount: 249,
+    credits: 1500,
+    description: 'Complete career acceleration package for Senior/Staff roles.',
     features: [
-      '6500 AI Interview Credits',
-      'Advanced AI Feedback',
-      'Skill Trend Analysis',
-      'Priority AI Processing',
+      '1500 AI Interview Credits',
+      'Advanced System Design Simulations',
+      'STAR Behavioral Masterclass',
+      '7-Day Personal Strategy Engine',
+      'Unlimited PDF & Word ATS Exporter',
     ],
-    badge: 'Best Value',
+    badge: 'Most Popular',
   },
-]
+];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -60,7 +69,7 @@ const containerVariants = {
       staggerChildren: 0.12,
     },
   },
-}
+};
 
 const itemVariants = {
   hidden: { opacity: 0, y: 36 },
@@ -69,200 +78,252 @@ const itemVariants = {
     y: 0,
     transition: { duration: 0.55, ease: 'easeOut' },
   },
-}
+};
 
 const Pricing = () => {
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { userData } = useSelector((state) => state.user);
 
-  const [selectedPlan, setSelectedPlan] = useState('free')
-  const [loadingPlan, setLoadingPlan] = useState(null)
+  const [selectedPlan, setSelectedPlan] = useState('pro');
+  const [loadingPlan, setLoadingPlan] = useState(null);
+  const [showAuth, setShowAuth] = useState(false);
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
 
   const handlePayment = async (plan) => {
-    if (plan.default) return
+    if (plan.default) return;
 
-    if (!window.Razorpay) {
-      alert('Payment service is not ready. Please refresh the page and try again.')
-      return
+    // Authorization Guard: Require login prior to payment processing
+    if (!userData) {
+      setShowAuth(true);
+      return;
+    }
+
+    const loaded = await loadRazorpayScript();
+    if (!loaded || !window.Razorpay) {
+      alert('Unable to load Razorpay payment gateway SDK. Please check your network connection.');
+      return;
     }
 
     try {
-      setLoadingPlan(plan.id)
+      setLoadingPlan(plan.id);
 
-      const amount = plan.id === 'basic' ? 100 : plan.id === 'pro' ? 500 : 0
-
-      const result = await axios.post(
+      const orderResponse = await axios.post(
         ServerUrl + '/api/payment/order',
         {
           planId: plan.id,
-          amount,
+          amount: plan.amount,
           credits: plan.credits,
         },
         { withCredentials: true }
-      )
+      );
+
+      const orderData = orderResponse.data;
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: result.data.amount,
-        currency: 'INR',
-        name: 'A.I Interview',
-        description: `${plan.name} - ${plan.credits} Credits`,
-        order_id: result.data.id,
+        key: orderData.key || import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency || 'INR',
+        name: 'SK Interview AI',
+        description: `${plan.name} - ${plan.credits} AI Credits`,
+        order_id: orderData.id,
         handler: async (response) => {
-          const verifiedPayment = await axios.post(
-            ServerUrl + '/api/payment/verify',
-            response,
-            { withCredentials: true }
-          )
+          try {
+            const verifiedPayment = await axios.post(
+              ServerUrl + '/api/payment/verify',
+              response,
+              { withCredentials: true }
+            );
 
-          dispatch(setUserData(verifiedPayment.data.user))
-          alert('Payment successful. Credits added!')
-          navigate('/')
+            if (verifiedPayment.data.success && verifiedPayment.data.user) {
+              dispatch(setUserData(verifiedPayment.data.user));
+              alert(`Payment Verified! ${plan.credits} credits added to your account.`);
+              navigate('/');
+            } else {
+              alert(verifiedPayment.data.message || 'Payment verification failed.');
+            }
+          } catch (verifyErr) {
+            console.error('Payment Verification Error:', verifyErr);
+            alert(verifyErr.response?.data?.message || 'Payment verification failed. Please contact support.');
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setLoadingPlan(null);
+          },
+        },
+        prefill: {
+          name: userData?.name || '',
+          email: userData?.email || '',
         },
         theme: {
-          color: '#16a34a',
+          color: '#10b981',
         },
-      }
+      };
 
-      const razorpay = new window.Razorpay(options)
-      razorpay.open()
+      const razorpay = new window.Razorpay(options);
+      razorpay.on('payment.failed', function (failureResponse) {
+        console.error('Payment Failed:', failureResponse.error);
+        alert(`Payment Failed: ${failureResponse.error.description}`);
+        setLoadingPlan(null);
+      });
+      razorpay.open();
     } catch (error) {
-      console.log(error)
-      alert(error.response?.data?.message || 'Unable to start payment. Please try again.')
-    } finally {
-      setLoadingPlan(null)
+      console.error('Order Creation Error:', error);
+      alert(error.response?.data?.message || 'Unable to initiate payment authorization. Please try again.');
+      setLoadingPlan(null);
     }
-  }
+  };
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f3f3f3] px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
-      <Motion.section
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: 'easeOut' }}
-        className="mx-auto max-w-6xl"
-      >
-        <div className="mb-10 flex flex-col gap-6 sm:mb-14 sm:flex-row sm:items-start">
-          <Motion.button
-            type="button"
-            onClick={() => navigate('/')}
-            whileHover={{ x: -3, scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
-            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-green-200 hover:bg-green-50 hover:text-green-700 hover:shadow-md"
-            aria-label="Back to home"
-          >
-            <FaArrowLeft />
-          </Motion.button>
+    <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex flex-col">
+      <Navbar />
 
-          <div className="w-full text-center sm:pr-12">
-            <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-green-600">
-              Pricing
-            </p>
-            <h1 className="mx-auto max-w-3xl text-3xl font-semibold leading-tight text-gray-950 sm:text-4xl lg:text-6xl">
-              Choose the plan that fits your interview practice
-            </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-gray-500 sm:text-lg">
-              Flexible credits, clear reports, and AI interview practice that scales from quick
-              warmups to serious preparation.
-            </p>
-          </div>
-        </div>
-      </Motion.section>
-
-      <Motion.section
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.18 }}
-        className="mx-auto grid max-w-6xl grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3"
-      >
-        {plans.map((plan) => {
-          const isSelected = selectedPlan === plan.id
-          const isLoading = loadingPlan === plan.id
-
-          return (
-            <Motion.article
-              key={plan.id}
-              variants={itemVariants}
-              whileHover={{ y: -8, scale: 1.015 }}
-              transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-              onClick={() => setSelectedPlan(plan.id)}
-              className={`relative flex min-h-[430px] cursor-pointer flex-col rounded-2xl border bg-white p-5 shadow-sm transition-all duration-300 sm:p-6 lg:p-8 ${
-                isSelected
-                  ? 'border-green-500 shadow-2xl shadow-green-100'
-                  : 'border-gray-200 hover:border-green-200 hover:shadow-xl'
-              }`}
+      <main className="flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <Motion.section
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: 'easeOut' }}
+          className="mx-auto max-w-6xl"
+        >
+          <div className="mb-10 flex flex-col gap-6 sm:mb-14 sm:flex-row sm:items-start">
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-300 shadow-md transition hover:bg-slate-800 hover:text-white cursor-pointer"
+              aria-label="Back to home"
             >
-              {plan.badge && (
-                <span
-                  className={`absolute right-5 top-5 rounded-full px-3 py-1 text-xs font-semibold sm:right-6 sm:top-6 ${
-                    plan.default
-                      ? 'bg-gray-100 text-gray-600'
-                      : 'bg-green-600 text-white shadow-sm shadow-green-200'
-                  }`}
-                >
-                  {plan.badge}
-                </span>
-              )}
+              <FaArrowLeft />
+            </button>
 
-              <div className="pr-24">
-                <h2 className="text-xl font-semibold text-gray-950">{plan.name}</h2>
-                <p className="mt-5 text-4xl font-semibold tracking-tight text-green-600 sm:text-5xl">
-                  {plan.price}
-                </p>
-                <p className="mt-2 text-sm font-medium text-gray-500">
-                  {plan.credits.toLocaleString('en-IN')} credits
-                </p>
-              </div>
+            <div className="w-full text-center sm:pr-10">
+              <h1 className="mx-auto max-w-3xl text-3xl font-extrabold leading-tight text-white sm:text-4xl lg:text-5xl mt-1">
+                Flexible AI Interview & Career Intelligence Credit Plans
+              </h1>
+              <p className="mx-auto mt-4 max-w-2xl text-xs sm:text-sm leading-relaxed text-slate-400">
+                Transparent credit packages designed for developers targeting top US compensation packages ($150k–$350k+).
+              </p>
+            </div>
+          </div>
+        </Motion.section>
 
-              <p className="mt-6 min-h-12 text-sm leading-6 text-gray-500">{plan.description}</p>
+        <Motion.section
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.18 }}
+          className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+        >
+          {plans.map((plan) => {
+            const isSelected = selectedPlan === plan.id;
+            const isLoading = loadingPlan === plan.id;
 
-              <div className="mt-7 space-y-4">
-                {plan.features.map((feature) => (
-                  <div key={feature} className="flex items-start gap-3">
-                    <FaCheckCircle className="mt-0.5 shrink-0 text-green-500" />
-                    <span className="text-sm leading-6 text-gray-700">{feature}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-auto pt-8">
-                {plan.default ? (
-                  <div className="flex min-h-12 items-center justify-center rounded-full border border-gray-200 bg-gray-50 px-5 py-3 text-sm font-semibold text-gray-600">
-                    Included by default
-                  </div>
-                ) : (
-                  <Motion.button
-                    type="button"
-                    disabled={isLoading}
-                    whileHover={!isLoading ? { scale: 1.02 } : undefined}
-                    whileTap={!isLoading ? { scale: 0.98 } : undefined}
-                    onClick={(event) => {
-                      event.stopPropagation()
-
-                      if (!isSelected) {
-                        setSelectedPlan(plan.id)
-                        return
-                      }
-
-                      handlePayment(plan)
-                    }}
-                    className={`flex min-h-12 w-full items-center justify-center rounded-full px-5 py-3 text-sm font-semibold shadow-sm transition ${
-                      isSelected
-                        ? 'bg-green-600 text-white hover:bg-green-700'
-                        : 'bg-gray-100 text-gray-700 hover:bg-green-50 hover:text-green-700'
-                    } disabled:bg-gray-300 disabled:text-gray-500`}
+            return (
+              <Motion.article
+                key={plan.id}
+                variants={itemVariants}
+                whileHover={{ y: -6 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                onClick={() => setSelectedPlan(plan.id)}
+                className={`relative flex min-h-[440px] cursor-pointer flex-col rounded-3xl border bg-slate-900/90 p-6 sm:p-8 shadow-2xl backdrop-blur-xl transition-all duration-300 ${
+                  isSelected
+                    ? 'border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.2)]'
+                    : 'border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                {plan.badge && (
+                  <span
+                    className={`absolute right-6 top-6 rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider ${
+                      plan.default
+                        ? 'bg-slate-800 text-slate-400 border border-slate-700'
+                        : 'bg-emerald-500 text-slate-950 shadow-md'
+                    }`}
                   >
-                    {isLoading ? 'Processing...' : isSelected ? 'Proceed to Pay' : 'Select Plan'}
-                  </Motion.button>
+                    {plan.badge}
+                  </span>
                 )}
-              </div>
-            </Motion.article>
-          )
-        })}
-      </Motion.section>
-    </main>
-  )
-}
 
-export default Pricing
+                <div>
+                  <h2 className="text-xl font-extrabold text-white">{plan.name}</h2>
+                  <p className="mt-4 text-4xl font-black text-emerald-400 sm:text-5xl">
+                    {plan.price}
+                  </p>
+                  <p className="mt-1 text-xs font-bold text-slate-400">
+                    {plan.credits.toLocaleString('en-US')} AI Credits
+                  </p>
+                </div>
+
+                <p className="mt-5 text-xs text-slate-400 leading-relaxed">{plan.description}</p>
+
+                <div className="mt-6 space-y-3">
+                  {plan.features.map((feature) => (
+                    <div key={feature} className="flex items-start gap-2.5">
+                      <FaCheckCircle className="mt-0.5 shrink-0 text-emerald-400 text-xs" />
+                      <span className="text-xs text-slate-300">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-auto pt-8">
+                  {plan.default ? (
+                    <div className="flex min-h-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-950 px-5 py-3 text-xs font-bold text-slate-500">
+                      Included Default Plan
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isLoading}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        if (!isSelected) {
+                          setSelectedPlan(plan.id);
+                          return;
+                        }
+                        handlePayment(plan);
+                      }}
+                      className={`flex min-h-12 w-full items-center justify-center rounded-2xl px-5 py-3 text-xs font-extrabold shadow-md transition cursor-pointer ${
+                        isSelected
+                          ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
+                          : 'bg-slate-950 text-slate-300 border border-slate-800 hover:border-slate-700'
+                      } disabled:bg-slate-800 disabled:text-slate-500`}
+                    >
+                      {isLoading ? (
+                        'Securing Authorization...'
+                      ) : !userData ? (
+                        <span className="flex items-center gap-2">
+                          <FaLock className="text-xs" /> Login to Purchase
+                        </span>
+                      ) : isSelected ? (
+                        'Proceed to Secure Checkout'
+                      ) : (
+                        'Select Package'
+                      )}
+                    </button>
+                  )}
+                </div>
+              </Motion.article>
+            );
+          })}
+        </Motion.section>
+      </main>
+
+      {showAuth && <AuthModel onClose={() => setShowAuth(false)} />}
+      <Footer />
+    </div>
+  );
+};
+
+export default Pricing;
