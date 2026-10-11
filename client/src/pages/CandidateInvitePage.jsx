@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -22,16 +22,7 @@ const CandidateInvitePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (token) {
-      fetchInvitationDetails();
-    } else {
-      setError('Invalid invitation link.');
-      setLoading(false);
-    }
-  }, [token]);
-
-  const fetchInvitationDetails = async () => {
+  const fetchInvitationDetails = useCallback(async () => {
     try {
       const res = await axios.get(`${ServerUrl}/api/recruiter/invite/${token}`);
       if (res.data.success && res.data.data) {
@@ -44,7 +35,16 @@ const CandidateInvitePage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      fetchInvitationDetails();
+    } else {
+      setError('Invalid invitation link.');
+      setLoading(false);
+    }
+  }, [token, fetchInvitationDetails]);
 
   const handleStartInterview = () => {
     if (!invitation) return;

@@ -189,8 +189,8 @@ export const generateAtsOptimizedResume = async ({ userId, resumeId, jobId }) =>
     optimizedData = await callAiProviderJson(messages, { temperature: 0.3 });
   } catch (err) {
     console.warn("AI ATS optimization failed, generating fallback structured ATS resume:", err.message);
-    const parsedRes = targetResume.parsedData || {};
-    const parsedJob = targetJob.parsedData || {};
+    const parsedRes = targetResume?.parsedData || {};
+    const parsedJob = targetJob?.parsedData || {};
     optimizedData = {
       targetRole: parsedJob.title || parsedRes.role || "Software Developer",
       candidateName: parsedRes.name || "Candidate Name",

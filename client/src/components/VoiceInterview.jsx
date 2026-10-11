@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import femaleVideo from '../assets/Videos/female-ai.mp4';
 import Timer from './Timer';
 import { motion as Motion } from 'framer-motion';
@@ -105,7 +105,7 @@ const VoiceInterview = ({ interviewData, onFinish }) => {
     try {
       recognitionRef.current.start();
       isRecognitionRunningRef.current = true;
-    } catch (e) {
+    } catch {
       isRecognitionRunningRef.current = false;
     }
   }, []);
@@ -340,6 +340,12 @@ const VoiceInterview = ({ interviewData, onFinish }) => {
               </div>
             )}
           </div>
+
+          {subtitle && (
+            <div className="w-full px-3 py-1.5 mb-2 bg-slate-900/90 border border-slate-800 rounded-xl text-[11px] text-emerald-400 font-medium italic line-clamp-2">
+              &quot;{subtitle}&quot;
+            </div>
+          )}
 
           <div className="w-full space-y-3">
             <div className="flex justify-center items-center gap-3">

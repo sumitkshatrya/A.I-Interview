@@ -5,17 +5,30 @@ export const parseAiJson = (rawContent) => {
     throw new Error("AI returned invalid content.");
   }
 
-  const cleaned = rawContent
-    .trim()
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim();
+  let cleaned = rawContent.trim();
+
+  // Extract from markdown code fence if present
+  const markdownMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  if (markdownMatch) {
+    cleaned = markdownMatch[1].trim();
+  } else {
+    // If no code fence, attempt to extract the outermost JSON object or array
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    const firstBracket = cleaned.indexOf('[');
+    const lastBracket = cleaned.lastIndexOf(']');
+
+    if (firstBrace !== -1 && lastBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+      cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+    } else if (firstBracket !== -1 && lastBracket !== -1) {
+      cleaned = cleaned.substring(firstBracket, lastBracket + 1);
+    }
+  }
 
   try {
     return JSON.parse(cleaned);
   } catch (error) {
-    // Attempt basic JSON repair for common missing bracket/quote issues
+    // Attempt basic JSON repair for common trailing commas
     try {
       const repaired = cleaned
         .replace(/,\s*}/g, "}")

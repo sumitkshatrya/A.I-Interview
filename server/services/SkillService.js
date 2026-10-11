@@ -57,6 +57,7 @@ export const updateSkillFromEvaluation = async (userId, skillName, score, diffic
   // Also sync to User model skills list
   const user = await User.findById(userId);
   if (user) {
+    if (!user.skills) user.skills = [];
     const existingIndex = user.skills.findIndex(s => s.name === skillName);
     if (existingIndex >= 0) {
       user.skills[existingIndex].masteryLevel = skillRecord.masteryLevel;

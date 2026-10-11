@@ -111,6 +111,22 @@ export const processTurnAndGetNextQuestion = async ({
   currentQ.timeTaken = timeTaken;
   currentQ.evaluation = evaluationResult;
 
+  if (!interview.state) {
+    interview.state = {
+      currentStep: 1,
+      maxSteps: 5,
+      currentDifficulty: 3,
+      currentCompetency: "General Technical",
+      weakSkills: [],
+      strongSkills: [],
+      previousTopics: [],
+      isFinished: false
+    };
+  }
+  if (!interview.state.previousTopics) interview.state.previousTopics = [];
+  if (!interview.state.strongSkills) interview.state.strongSkills = [];
+  if (!interview.state.weakSkills) interview.state.weakSkills = [];
+
   if (currentQ.competency && !interview.state.previousTopics.includes(currentQ.competency)) {
     interview.state.previousTopics.push(currentQ.competency);
   }
@@ -125,8 +141,8 @@ export const processTurnAndGetNextQuestion = async ({
     }
   }
 
-  const nextStepNum = interview.state.currentStep + 1;
-  const maxSteps = interview.state.maxSteps;
+  const nextStepNum = (interview.state.currentStep || 1) + 1;
+  const maxSteps = interview.state.maxSteps || 5;
 
   if (nextStepNum > maxSteps) {
     interview.state.isFinished = true;

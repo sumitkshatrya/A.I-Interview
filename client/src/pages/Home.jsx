@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -63,13 +63,7 @@ const Home = () => {
   const [recentInterviews, setRecentInterviews] = useState([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (userData) {
-      fetchDashboardMetrics();
-    }
-  }, [userData]);
-
-  const fetchDashboardMetrics = async () => {
+  const fetchDashboardMetrics = useCallback(async () => {
     try {
       const [matchRes, skillRes, interviewRes] = await Promise.all([
         axios.get(ServerUrl + '/api/career/match/latest', { withCredentials: true }),
@@ -82,10 +76,16 @@ const Home = () => {
       if (interviewRes.data.interviews || interviewRes.data.data?.interviews) {
         setRecentInterviews(interviewRes.data.interviews || interviewRes.data.data.interviews);
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.warn("Failed to fetch dashboard metrics:", err.message);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (userData) {
+      fetchDashboardMetrics();
+    }
+  }, [userData, fetchDashboardMetrics]);
 
   const weakSkill = skillGraph.find(s => s.masteryLevel === 'Weak' || s.masteryLevel === 'Developing')?.skillName || "System Architecture";
   const strongSkill = skillGraph.find(s => s.masteryLevel === 'Mastered' || s.masteryLevel === 'Strong')?.skillName || "Full Stack Engineering";

@@ -180,9 +180,24 @@ export const finishInterview = async (req, res) => {
     interview.communicationScore = Number(avgComm.toFixed(1));
     interview.correctnessScore = Number(avgCorr.toFixed(1));
     interview.status = "completed";
+    if (!interview.state) interview.state = {};
     interview.state.isFinished = true;
 
     await interview.save();
+
+    const formattedQuestions = questions.map((q) => ({
+      question: q.question,
+      competency: q.competency,
+      difficulty: q.difficulty || 3,
+      answer: q.answer || "",
+      timeTaken: q.timeTaken || 0,
+      score: q.evaluation?.finalScore ?? q.score ?? 0,
+      feedback: q.evaluation?.feedback ?? q.feedback ?? "",
+      confidence: q.evaluation?.confidence ?? q.confidence ?? (q.evaluation?.finalScore ?? 0),
+      communication: q.evaluation?.communication ?? q.communication ?? (q.evaluation?.finalScore ?? 0),
+      correctness: q.evaluation?.accuracy ?? q.correctness ?? (q.evaluation?.finalScore ?? 0),
+      evaluation: q.evaluation
+    }));
 
     return res.status(200).json({
       success: true,
@@ -192,13 +207,7 @@ export const finishInterview = async (req, res) => {
         confidence: interview.confidenceScore,
         communication: interview.communicationScore,
         correctness: interview.correctnessScore,
-        questionWiseScore: questions.map((q) => ({
-          question: q.question,
-          competency: q.competency,
-          score: q.evaluation?.finalScore ?? q.score ?? 0,
-          feedback: q.evaluation?.feedback ?? q.feedback ?? "",
-          evaluation: q.evaluation
-        }))
+        questionWiseScore: formattedQuestions
       },
       // Backward compatibility fields
       interviewId: interview._id,
@@ -206,14 +215,7 @@ export const finishInterview = async (req, res) => {
       confidence: interview.confidenceScore,
       communication: interview.communicationScore,
       correctness: interview.correctnessScore,
-      questionWiseScore: questions.map((q) => ({
-        question: q.question,
-        score: q.evaluation?.finalScore ?? q.score ?? 0,
-        feedback: q.evaluation?.feedback ?? q.feedback ?? "",
-        confidence: q.evaluation?.confidence ?? q.confidence ?? 0,
-        communication: q.evaluation?.communication ?? q.communication ?? 0,
-        correctness: q.evaluation?.accuracy ?? q.correctness ?? 0
-      }))
+      questionWiseScore: formattedQuestions
     });
   } catch (error) {
     console.error("Finish interview error:", error);
@@ -243,6 +245,20 @@ export const getInterviewReport = async (req, res) => {
     const interview = await Interview.findOne({ _id: req.params.id, userId: req.userId });
     if (!interview) return res.status(404).json({ success: false, message: "Interview report not found." });
 
+    const formattedQuestions = (interview.questions || []).map((q) => ({
+      question: q.question,
+      competency: q.competency,
+      difficulty: q.difficulty || 3,
+      answer: q.answer || "",
+      timeTaken: q.timeTaken || 0,
+      score: q.evaluation?.finalScore ?? q.score ?? 0,
+      feedback: q.evaluation?.feedback ?? q.feedback ?? "",
+      confidence: q.evaluation?.confidence ?? q.confidence ?? (q.evaluation?.finalScore ?? 0),
+      communication: q.evaluation?.communication ?? q.communication ?? (q.evaluation?.finalScore ?? 0),
+      correctness: q.evaluation?.accuracy ?? q.correctness ?? (q.evaluation?.finalScore ?? 0),
+      evaluation: q.evaluation
+    }));
+
     return res.status(200).json({
       success: true,
       data: {
@@ -257,7 +273,8 @@ export const getInterviewReport = async (req, res) => {
         confidence: interview.confidenceScore,
         communication: interview.communicationScore,
         correctness: interview.correctnessScore,
-        questions: interview.questions
+        questions: formattedQuestions,
+        questionWiseScore: formattedQuestions
       },
       // Backward compatibility fields
       role: interview.role,
@@ -269,7 +286,8 @@ export const getInterviewReport = async (req, res) => {
       confidence: interview.confidenceScore,
       communication: interview.communicationScore,
       correctness: interview.correctnessScore,
-      questionWiseScore: interview.questions
+      questions: formattedQuestions,
+      questionWiseScore: formattedQuestions
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

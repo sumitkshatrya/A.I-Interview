@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -50,50 +50,52 @@ const CareerHub = () => {
   const [loadingOptimize, setLoadingOptimize] = useState(false);
   const [optimizedResume, setOptimizedResume] = useState(null);
 
-  useEffect(() => {
-    fetchSkillGraph();
-    fetchPrepPlan();
-  }, []);
-
-  const fetchSkillGraph = async () => {
+  const fetchSkillGraph = useCallback(async () => {
     try {
       const res = await axios.get(ServerUrl + '/api/career/skill-graph', { withCredentials: true });
       setSkillGraph(res.data.data || []);
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.warn("Failed to fetch skill graph:", err.message);
     }
-  };
+  }, []);
 
-  const fetchPrepPlan = async () => {
+  const fetchPrepPlan = useCallback(async () => {
     try {
       const res = await axios.get(ServerUrl + '/api/career/prep-plan', { withCredentials: true });
       setPrepPlan(res.data.data || null);
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.warn("Failed to fetch prep plan:", err.message);
     }
-  };
+  }, []);
 
-  const fetchLatestMatch = async () => {
+  const fetchLatestMatch = useCallback(async () => {
     try {
       const res = await axios.get(ServerUrl + '/api/career/match/latest', { withCredentials: true });
       if (res.data.data) {
         setMatchData(res.data.data);
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.warn("Failed to fetch latest match:", err.message);
     }
-  };
+  }, []);
 
-  const fetchLatestOptimizedResume = async () => {
+  const fetchLatestOptimizedResume = useCallback(async () => {
     try {
       const res = await axios.get(ServerUrl + '/api/career/optimized-resume', { withCredentials: true });
       if (res.data.data) {
         setOptimizedResume(res.data.data);
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.warn("Failed to fetch optimized resume:", err.message);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchSkillGraph();
+    fetchPrepPlan();
+    fetchLatestMatch();
+    fetchLatestOptimizedResume();
+  }, [fetchSkillGraph, fetchPrepPlan, fetchLatestMatch, fetchLatestOptimizedResume]);
 
   const handleResumeUpload = async () => {
     if (!resumeFile) return;
@@ -158,8 +160,8 @@ const CareerHub = () => {
       await axios.delete(ServerUrl + `/api/career/resume/${id}`, { withCredentials: true });
       setResumeData(null);
       setResumeFile(null);
-    } catch (e) {
-      setError('Failed to delete resume.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete resume.');
     }
   };
 
@@ -170,8 +172,8 @@ const CareerHub = () => {
       await axios.delete(ServerUrl + `/api/career/job/${id}`, { withCredentials: true });
       setJobData(null);
       setJdText('');
-    } catch (e) {
-      setError('Failed to delete job description.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete job description.');
     }
   };
 
@@ -181,8 +183,8 @@ const CareerHub = () => {
       const id = matchData?._id || 'latest';
       await axios.delete(ServerUrl + `/api/career/match/${id}`, { withCredentials: true });
       setMatchData(null);
-    } catch (e) {
-      setError('Failed to delete match analysis.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete match analysis.');
     }
   };
 
@@ -833,6 +835,20 @@ const CareerHub = () => {
             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <FaMagic className="text-blue-600" /> AI Resume Bullet Point Improver
             </h3>
+
+            <div>
+              <label className="text-xs font-bold text-gray-700 block mb-1">Improvement Goal</label>
+              <select
+                value={improverGoal}
+                onChange={(e) => setImproverGoal(e.target.value)}
+                className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs text-gray-900 font-medium outline-none focus:ring-2 focus:ring-blue-500 transition mb-3"
+              >
+                <option value="Make ATS friendly & impactful">Make ATS friendly & impactful</option>
+                <option value="Emphasize Technical Architecture & Scalability">Emphasize Technical Architecture & Scalability</option>
+                <option value="Highlight Measurable Business Metrics (STAR)">Highlight Measurable Business Metrics (STAR)</option>
+                <option value="Demonstrate Leadership & Cross-Functional Ownership">Demonstrate Leadership & Cross-Functional Ownership</option>
+              </select>
+            </div>
 
             <div>
               <label className="text-xs font-bold text-gray-700 block mb-1">Select / Type Original Bullet Point</label>

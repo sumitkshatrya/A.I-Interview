@@ -7,7 +7,16 @@ import { analyzeResume, finishInterview, generateQuestion, getInterviewReport, g
 
 const interviewRouter = express.Router();
 
-interviewRouter.post("/resume", isAuth, upload.single("resume"), analyzeResume);
+const handleUpload = (req, res, next) => {
+  upload.single("resume")(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ success: false, message: err.message || "File upload failed." });
+    }
+    next();
+  });
+};
+
+interviewRouter.post("/resume", isAuth, handleUpload, analyzeResume);
 interviewRouter.post("/generate-questions", isAuth, generateQuestion);
 interviewRouter.post("/submit-answer", isAuth, submitAnswer);
 interviewRouter.post("/finish", isAuth, finishInterview);

@@ -133,7 +133,7 @@ export const exportAtsResumePdf = (resumeData) => {
           const bulletLines = doc.splitTextToSize(ach, contentWidth - 15);
           checkPageBreak(bulletLines.length * 13 + 4);
           doc.text('•', margin + 4, y);
-          bulletLines.forEach((line, idx) => {
+          bulletLines.forEach((line) => {
             doc.text(line, margin + 16, y);
             y += 13;
           });

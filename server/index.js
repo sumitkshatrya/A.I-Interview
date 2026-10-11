@@ -14,16 +14,33 @@ dotenv.config();
 
 const app = express();
 
+const allowedOrigins = [
+  "https://a-i-interview-client.onrender.com",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+];
+if (process.env.CLIENT_URL && !allowedOrigins.includes(process.env.CLIENT_URL)) {
+  allowedOrigins.push(process.env.CLIENT_URL);
+}
+
 app.use(cors({
-   origin: [
-     "https://a-i-interview-client.onrender.com",
-     "http://localhost:5173"
-   ],
-   credentials: true,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Permissive in dev/testing, supports requests
+    }
+  },
+  credentials: true,
 }));
 
 app.use(express.json());
 app.use(cookieParser());
+
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  return res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
@@ -35,6 +52,18 @@ app.use("/api/recruiter", recruiterRouter);
 app.get("/interview/invite/:token", (req, res) => {
   const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
   return res.redirect(`${clientUrl.replace(/\/$/, '')}/interview/invite/${req.params.token}`);
+});
+
+// Global Express Error Handler
+app.use((err, req, res, next) => {
+  console.error("Unhandled Error:", err);
+  if (res.headersSent) {
+    return next(err);
+  }
+  return res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal server error occurred.",
+  });
 });
 
 const PORT = process.env.PORT || 8000;

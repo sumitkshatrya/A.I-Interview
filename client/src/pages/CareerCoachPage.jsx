@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
@@ -148,16 +148,30 @@ const CareerCoachPage = () => {
     "How can I improve my behavioral answers using STAR?"
   ];
 
-  useEffect(() => {
-    fetchConversations();
+  const startNewChatState = () => {
+    setActiveConversationId(null);
+    setMessages([
+      {
+        sender: 'coach',
+        text: `Hello! I am your AI Career Coach & Mentor. I've reviewed your target role, resume, and mock interview history. How can I help accelerate your prep today?`
+      }
+    ]);
+  };
+
+  // Load specific thread messages
+  const loadConversationHistory = useCallback(async (convId) => {
+    try {
+      const res = await axios.get(`${ServerUrl}/api/career/coach/conversation/${convId}`, { withCredentials: true });
+      if (res.data.success && res.data.data) {
+        setMessages(res.data.data);
+      }
+    } catch (err) {
+      console.warn("Failed to load conversation history:", err.message);
+    }
   }, []);
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
   // Fetch all user sessions
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     setConversationsLoading(true);
     try {
       const res = await axios.get(ServerUrl + '/api/career/coach/conversations', { withCredentials: true });
@@ -172,35 +186,21 @@ const CareerCoachPage = () => {
           startNewChatState();
         }
       }
-    } catch (e) {
-      console.error("Failed to load conversations", e);
+    } catch (err) {
+      console.warn("Failed to load conversations:", err.message);
       startNewChatState();
     } finally {
       setConversationsLoading(false);
     }
-  };
+  }, [loadConversationHistory]);
 
-  // Load specific thread messages
-  const loadConversationHistory = async (convId) => {
-    try {
-      const res = await axios.get(`${ServerUrl}/api/career/coach/conversation/${convId}`, { withCredentials: true });
-      if (res.data.success && res.data.data) {
-        setMessages(res.data.data);
-      }
-    } catch (e) {
-      console.error("Failed to load conversation history", e);
-    }
-  };
+  useEffect(() => {
+    fetchConversations();
+  }, [fetchConversations]);
 
-  const startNewChatState = () => {
-    setActiveConversationId(null);
-    setMessages([
-      {
-        sender: 'coach',
-        text: `Hello! I am your AI Career Coach & Mentor. I've reviewed your target role, resume, and mock interview history. How can I help accelerate your prep today?`
-      }
-    ]);
-  };
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   // Create new session via API
   const handleNewChat = async () => {
@@ -218,7 +218,7 @@ const CareerCoachPage = () => {
         ]);
         setSidebarOpen(false);
       }
-    } catch (e) {
+    } catch {
       startNewChatState();
       setSidebarOpen(false);
     }
@@ -291,7 +291,7 @@ const CareerCoachPage = () => {
           }
         });
       }
-    } catch (e) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         { sender: 'coach', text: 'Sorry, I ran into a temporary issue fetching insights. Please try again.' }
