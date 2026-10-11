@@ -175,7 +175,7 @@ const ResumeTemplate = () => {
             <div className='space-y-5 border-l-2 border-[#ddd4c7] pl-5'>
               {profile.education.map((item) => (
                 <div key={`${item.years}-${item.course}`} className='relative'>
-                  <span className='absolute -left-[29px] top-1 h-3.5 w-3.5 rounded-full border-2 border-[#2f3437] bg-white' />
+                  <span className='absolute -left-7.25 top-1 h-3.5 w-3.5 rounded-full border-2 border-[#2f3437] bg-white' />
                   <p className='text-sm font-semibold text-[#2f3437]'>{item.years}</p>
                   <p className='mt-1 font-bold uppercase tracking-wide text-[#2f3437]'>{item.institute}</p>
                   <p className='text-sm text-[#5d5952]'>{item.course}</p>
@@ -192,7 +192,7 @@ const ResumeTemplate = () => {
             <div className='space-y-6 border-l-2 border-[#ddd4c7] pl-5'>
               {profile.experience.map((item) => (
                 <div key={`${item.duration}-${item.role}`} className='relative'>
-                  <span className='absolute -left-[29px] top-1 h-3.5 w-3.5 rounded-full border-2 border-[#2f3437] bg-white' />
+                  <span className='absolute -left-7.25 top-1 h-3.5 w-3.5 rounded-full border-2 border-[#2f3437] bg-white' />
                   <p className='text-sm font-semibold text-[#2f3437]'>{item.duration}</p>
                   <p className='mt-1 font-bold uppercase tracking-wide text-[#2f3437]'>{item.role}</p>
                   <ul className='mt-3 space-y-2 pl-4 text-sm leading-6 text-[#5d5952]'>

@@ -310,9 +310,9 @@ const VoiceInterview = ({ interviewData, onFinish }) => {
 
   return (
     <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-6xl bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-xl overflow-hidden flex flex-col md:flex-row min-h-[640px]">
+      <div className="w-full max-w-6xl bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-xl overflow-hidden flex flex-col md:flex-row min-h-160">
         {/* Left Video Avatar Panel */}
-        <div className="w-full md:w-[380px] bg-slate-950 p-6 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col justify-between items-center text-center relative">
+        <div className="w-full md:w-95 bg-slate-950 p-6 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col justify-between items-center text-center relative">
           <div className="w-full flex justify-between items-center mb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">AI Bar Raiser Avatar</span>
             <button

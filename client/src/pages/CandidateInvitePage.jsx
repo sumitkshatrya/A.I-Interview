@@ -153,7 +153,7 @@ const CandidateInvitePage = () => {
             {/* Action CTA */}
             <button
               onClick={handleStartInterview}
-              className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold py-4 rounded-2xl text-sm shadow-xl transition flex items-center justify-center gap-2 group"
+              className="w-full bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold py-4 rounded-2xl text-sm shadow-xl transition flex items-center justify-center gap-2 group"
             >
               <FaPlay className="text-xs group-hover:scale-110 transition-transform" />
               Start AI Interview Assessment Now

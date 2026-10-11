@@ -107,7 +107,7 @@ const FormattedCoachMessage = ({ text }) => {
     else if (trimmed.toLowerCase().includes('encouragement') || trimmed.toLowerCase().includes('next steps') || trimmed.toLowerCase().includes('action step')) {
       flushList();
       renderedBlocks.push(
-        <div key={`callout-${blockKey++}`} className="my-3 p-3.5 bg-gradient-to-r from-purple-900/60 to-indigo-900/60 border border-purple-500/30 text-white rounded-xl shadow-md space-y-1">
+        <div key={`callout-${blockKey++}`} className="my-3 p-3.5 bg-linear-to-r from-purple-900/60 to-indigo-900/60 border border-purple-500/30 text-white rounded-xl shadow-md space-y-1">
           <div className="flex items-center gap-1.5 font-bold text-xs">
             <FaRocket className="text-amber-300" />
             <span>{trimmed.replace(/^#+\s*/, '')}</span>
@@ -313,7 +313,7 @@ const CareerCoachPage = () => {
         {/* Mobile Header Toggle */}
         <div className="lg:hidden flex items-center justify-between bg-slate-900/80 p-3 rounded-2xl border border-slate-800 mb-3">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
+            <div className="p-2 bg-linear-to-br from-purple-600 to-indigo-600 text-white rounded-xl">
               <FaRobot size={18} />
             </div>
             <div>
@@ -338,12 +338,12 @@ const CareerCoachPage = () => {
           <div
             className={`${
               sidebarOpen ? 'block' : 'hidden'
-            } lg:block lg:col-span-4 bg-slate-900/90 border border-slate-800/90 rounded-3xl p-4 flex flex-col h-[650px] shadow-2xl relative backdrop-blur-md`}
+            } lg:block lg:col-span-4 bg-slate-900/90 border border-slate-800/90 rounded-3xl p-4 flex flex-col h-162.5 shadow-2xl relative backdrop-blur-md`}
           >
             {/* Top action: New Chat button */}
             <button
               onClick={handleNewChat}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3 px-4 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 mb-4 group text-sm"
+              className="w-full bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3 px-4 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 mb-4 group text-sm"
             >
               <FaPlus className="text-xs group-hover:rotate-90 transition-transform duration-300" />
               <span>New Strategy Chat</span>
@@ -430,11 +430,11 @@ const CareerCoachPage = () => {
           </div>
 
           {/* Right Main Panel: Active Chat Thread */}
-          <div className="lg:col-span-8 flex flex-col h-[650px] bg-slate-900/90 rounded-3xl border border-slate-800 shadow-2xl p-4 sm:p-6 backdrop-blur-md justify-between">
+          <div className="lg:col-span-8 flex flex-col h-162.5 bg-slate-900/90 rounded-3xl border border-slate-800 shadow-2xl p-4 sm:p-6 backdrop-blur-md justify-between">
             {/* Top Workspace Bar */}
             <div className="pb-3 border-b border-slate-800/80 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-2xl shadow-lg">
+                <div className="p-3 bg-linear-to-br from-purple-600 to-indigo-600 text-white rounded-2xl shadow-lg">
                   <FaRobot size={22} />
                 </div>
                 <div>
@@ -476,7 +476,7 @@ const CareerCoachPage = () => {
                     <div
                       className={`max-w-[90%] sm:max-w-[85%] p-4 rounded-2xl ${
                         msg.sender === 'user'
-                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-extrabold rounded-br-none text-xs sm:text-sm shadow-md'
+                          ? 'bg-linear-to-r from-emerald-500 to-teal-500 text-slate-950 font-extrabold rounded-br-none text-xs sm:text-sm shadow-md'
                           : 'bg-slate-950/90 border border-slate-800 text-slate-200 rounded-bl-none shadow-sm'
                       }`}
                     >
@@ -514,7 +514,7 @@ const CareerCoachPage = () => {
               <button
                 onClick={() => handleSendMessage()}
                 disabled={loading || !inputMessage.trim()}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white p-3.5 rounded-2xl transition shadow-lg disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed"
+                className="bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white p-3.5 rounded-2xl transition shadow-lg disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed"
               >
                 <FaPaperPlane size={16} />
               </button>

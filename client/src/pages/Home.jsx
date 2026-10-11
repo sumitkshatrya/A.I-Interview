@@ -83,7 +83,7 @@ const Home = () => {
 
   useEffect(() => {
     if (userData) {
-      fetchDashboardMetrics();
+      void Promise.resolve().then(fetchDashboardMetrics);
     }
   }, [userData, fetchDashboardMetrics]);
 
@@ -97,7 +97,7 @@ const Home = () => {
       {/* HERO SECTION - MARKET LEVEL US TECH SAAS */}
       <section className="relative overflow-hidden pt-12 pb-16 lg:pt-20 lg:pb-24 border-b border-slate-800/80">
         {/* Glowing Background Mesh Gradients */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[550px] bg-gradient-to-tr from-emerald-500/15 via-purple-500/10 to-cyan-500/15 blur-3xl pointer-events-none rounded-full" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-137.5 bg-linear-to-tr from-emerald-500/15 via-purple-500/10 to-cyan-500/15 blur-3xl pointer-events-none rounded-full" />
         <div className="absolute -top-24 right-10 w-96 h-96 bg-emerald-500/15 blur-[120px] pointer-events-none rounded-full" />
         <div className="absolute top-1/2 -left-20 w-80 h-80 bg-purple-500/15 blur-[100px] pointer-events-none rounded-full" />
 
@@ -125,7 +125,7 @@ const Home = () => {
               <Motion.div variants={itemVariants} className="md:col-span-7 space-y-6">
                 <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
                   Master Your Tech Interviews. <br className="hidden sm:inline" />
-                  <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
+                  <span className="bg-linear-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
                     Land Your $150k–$350k Target Role.
                   </span>
                 </h1>
@@ -176,7 +176,7 @@ const Home = () => {
 
               {/* Floating Interactive Hero Glassmorphism Widget */}
               <Motion.div variants={itemVariants} className="md:col-span-5 relative">
-                <div className="relative mx-auto max-w-sm rounded-3xl p-6 bg-gradient-to-b from-slate-900/95 to-slate-950/95 border border-slate-800 shadow-2xl backdrop-blur-xl space-y-5">
+                <div className="relative mx-auto max-w-sm rounded-3xl p-6 bg-linear-to-b from-slate-900/95 to-slate-950/95 border border-slate-800 shadow-2xl backdrop-blur-xl space-y-5">
                   <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                     <div className="flex items-center gap-2.5">
                       <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
@@ -205,8 +205,8 @@ const Home = () => {
                       {[40, 70, 30, 90, 60, 100, 45, 80, 55, 95, 40, 75, 50, 85].map((h, i) => (
                         <span
                           key={i}
-                          style={{ height: `${h}%` }}
-                          className="w-1 bg-gradient-to-t from-emerald-500 to-teal-300 rounded-full animate-pulse"
+                          style={{ blockSize: `${h}%` }}
+                          className="w-1 bg-linear-to-t from-emerald-500 to-teal-300 rounded-full animate-pulse"
                         />
                       ))}
                     </div>
@@ -237,7 +237,7 @@ const Home = () => {
                   <div className="pt-1">
                     <button
                       onClick={() => navigate('/coach')}
-                      className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs transition shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full py-2.5 px-4 rounded-xl bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs transition shadow-lg flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <HiSparkles /> Consult AI Career Coach
                     </button>
@@ -354,7 +354,7 @@ const Home = () => {
             </Motion.div>
 
             {/* Targeted Session CTA */}
-            <Motion.div variants={itemVariants} className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-emerald-500/30 hover:border-emerald-500/60 transition-all duration-300 shadow-xl flex flex-col justify-between space-y-4">
+            <Motion.div variants={itemVariants} className="p-6 rounded-3xl bg-linear-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-emerald-500/30 hover:border-emerald-500/60 transition-all duration-300 shadow-xl flex flex-col justify-between space-y-4">
               <div>
                 <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                   Recommended Daily Focus
@@ -455,7 +455,7 @@ const Home = () => {
       {/* AI CAREER COACH BANNER */}
       <section className="py-10 bg-slate-950 border-t border-b border-slate-800/80">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-purple-950/40 via-slate-900 to-indigo-950/40 border border-purple-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-2xl">
+          <div className="p-6 sm:p-8 rounded-3xl bg-linear-to-r from-purple-950/40 via-slate-900 to-indigo-950/40 border border-purple-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-2xl">
             <div className="flex items-start gap-4">
               <div className="p-3.5 bg-purple-600 text-white rounded-2xl shadow-lg shrink-0 mt-1">
                 <BsRobot size={26} />
