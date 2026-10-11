@@ -70,7 +70,7 @@ const extractJsonCandidates = (content) => {
       continue;
     }
 
-    if (character === '"' && stack.length > 0) {
+    if (character === '"') {
       inString = true;
     } else if (character === '{' || character === '[') {
       if (stack.length === 0) start = index;
@@ -97,13 +97,13 @@ export const parseAiJson = (rawContent) => {
   const cleaned = rawContent.trim();
   const fencedCandidates = [...cleaned.matchAll(/```(?:json)?\s*([\s\S]*?)\s*```/gi)];
 
+  const directCandidate = parseJsonCandidate(cleaned);
+  if (directCandidate.success) return directCandidate.value;
+
   for (const match of fencedCandidates) {
     const candidate = parseJsonCandidate(match[1].trim());
     if (candidate.success) return candidate.value;
   }
-
-  const directCandidate = parseJsonCandidate(cleaned);
-  if (directCandidate.success) return directCandidate.value;
 
   for (const candidateText of extractJsonCandidates(cleaned)) {
     const candidate = parseJsonCandidate(candidateText);
