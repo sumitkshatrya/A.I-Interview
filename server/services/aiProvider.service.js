@@ -1,43 +1,116 @@
 import axios from 'axios';
 
+const removeTrailingCommas = (candidate) => {
+  let repaired = '';
+  let inString = false;
+  let escaped = false;
+
+  for (let index = 0; index < candidate.length; index += 1) {
+    const character = candidate[index];
+
+    if (inString) {
+      repaired += character;
+      if (escaped) {
+        escaped = false;
+      } else if (character === '\\') {
+        escaped = true;
+      } else if (character === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (character === '"') {
+      inString = true;
+      repaired += character;
+    } else if (character === ',') {
+      let next = index + 1;
+      while (next < candidate.length && /\s/.test(candidate[next])) next += 1;
+      if (candidate[next] !== '}' && candidate[next] !== ']') repaired += character;
+    } else {
+      repaired += character;
+    }
+  }
+
+  return repaired;
+};
+
+const parseJsonCandidate = (candidate) => {
+  try {
+    return { success: true, value: JSON.parse(candidate) };
+  } catch {
+    const repaired = removeTrailingCommas(candidate);
+
+    try {
+      return { success: true, value: JSON.parse(repaired) };
+    } catch {
+      return { success: false };
+    }
+  }
+};
+
+const extractJsonCandidates = (content) => {
+  const candidates = [];
+  let start = -1;
+  let stack = [];
+  let inString = false;
+  let escaped = false;
+
+  for (let index = 0; index < content.length; index += 1) {
+    const character = content[index];
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (character === '\\') {
+        escaped = true;
+      } else if (character === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (character === '"' && stack.length > 0) {
+      inString = true;
+    } else if (character === '{' || character === '[') {
+      if (stack.length === 0) start = index;
+      stack.push(character === '{' ? '}' : ']');
+    } else if ((character === '}' || character === ']') && stack.length > 0) {
+      if (stack[stack.length - 1] === character) {
+        stack.pop();
+        if (stack.length === 0) {
+          candidates.push(content.slice(start, index + 1));
+          start = -1;
+        }
+      }
+    }
+  }
+
+  return candidates;
+};
+
 export const parseAiJson = (rawContent) => {
   if (!rawContent || typeof rawContent !== "string") {
     throw new Error("AI returned invalid content.");
   }
 
-  let cleaned = rawContent.trim();
+  const cleaned = rawContent.trim();
+  const fencedCandidates = [...cleaned.matchAll(/```(?:json)?\s*([\s\S]*?)\s*```/gi)];
 
-  // Extract from markdown code fence if present
-  const markdownMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-  if (markdownMatch) {
-    cleaned = markdownMatch[1].trim();
-  } else {
-    // If no code fence, attempt to extract the outermost JSON object or array
-    const firstBrace = cleaned.indexOf('{');
-    const lastBrace = cleaned.lastIndexOf('}');
-    const firstBracket = cleaned.indexOf('[');
-    const lastBracket = cleaned.lastIndexOf(']');
-
-    if (firstBrace !== -1 && lastBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
-      cleaned = cleaned.substring(firstBrace, lastBrace + 1);
-    } else if (firstBracket !== -1 && lastBracket !== -1) {
-      cleaned = cleaned.substring(firstBracket, lastBracket + 1);
-    }
+  for (const match of fencedCandidates) {
+    const candidate = parseJsonCandidate(match[1].trim());
+    if (candidate.success) return candidate.value;
   }
 
-  try {
-    return JSON.parse(cleaned);
-  } catch (error) {
-    // Attempt basic JSON repair for common trailing commas
-    try {
-      const repaired = cleaned
-        .replace(/,\s*}/g, "}")
-        .replace(/,\s*]/g, "]");
-      return JSON.parse(repaired);
-    } catch (repairErr) {
-      throw new Error(`AI non-JSON response parsing failed: ${cleaned.slice(0, 250)}`);
-    }
+  const directCandidate = parseJsonCandidate(cleaned);
+  if (directCandidate.success) return directCandidate.value;
+
+  for (const candidateText of extractJsonCandidates(cleaned)) {
+    const candidate = parseJsonCandidate(candidateText);
+    if (candidate.success) return candidate.value;
   }
+
+  throw new Error(`AI non-JSON response parsing failed: ${cleaned.slice(0, 250)}`);
 };
 
 export const callAiProvider = async (messages, options = {}) => {

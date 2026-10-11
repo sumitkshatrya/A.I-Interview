@@ -24,12 +24,7 @@ export const googleAuth = async (req, res) => {
 
     res.cookie("token", token, cookieOptions);
     const userObj = user.toObject ? user.toObject() : user;
-    return res.status(200).json({
-      ...userObj,
-      user: userObj,
-      token,
-      success: true,
-    });
+    return res.status(200).json(userObj);
   } catch (error) {
     return res.status(500).json({ message: `Google auth error: ${error.message}` });
   }

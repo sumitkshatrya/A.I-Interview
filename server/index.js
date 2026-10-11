@@ -28,7 +28,7 @@ app.use(cors({
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(null, true); // Permissive in dev/testing, supports requests
+      callback(null, false);
     }
   },
   credentials: true,
@@ -60,9 +60,10 @@ app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err);
   }
-  return res.status(err.status || 500).json({
+  const status = err.status || 500;
+  return res.status(status).json({
     success: false,
-    message: err.message || "Internal server error occurred.",
+    message: status >= 500 ? "Internal server error occurred." : "Invalid request.",
   });
 });
 

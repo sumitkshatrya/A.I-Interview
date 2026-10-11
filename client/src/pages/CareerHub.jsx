@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -36,6 +36,8 @@ const CareerHub = () => {
   const [loadingJob, setLoadingJob] = useState(false);
   const [loadingMatch, setLoadingMatch] = useState(false);
   const [error, setError] = useState('');
+  const latestMatchRequest = useRef(null);
+  const latestOptimizedResumeRequest = useRef(null);
 
   // Bullet Improver Modal state
   const [showImprover, setShowImprover] = useState(false);
@@ -69,24 +71,50 @@ const CareerHub = () => {
   }, []);
 
   const fetchLatestMatch = useCallback(async () => {
+    latestMatchRequest.current?.abort();
+    const controller = new AbortController();
+    latestMatchRequest.current = controller;
+
     try {
-      const res = await axios.get(ServerUrl + '/api/career/match/latest', { withCredentials: true });
-      if (res.data.data) {
+      const res = await axios.get(ServerUrl + '/api/career/match/latest', {
+        withCredentials: true,
+        signal: controller.signal,
+      });
+      if (!controller.signal.aborted && res.data.data) {
         setMatchData(res.data.data);
       }
     } catch (err) {
-      console.warn("Failed to fetch latest match:", err.message);
+      if (!axios.isCancel(err)) {
+        console.warn("Failed to fetch latest match:", err.message);
+      }
+    } finally {
+      if (latestMatchRequest.current === controller) {
+        latestMatchRequest.current = null;
+      }
     }
   }, []);
 
   const fetchLatestOptimizedResume = useCallback(async () => {
+    latestOptimizedResumeRequest.current?.abort();
+    const controller = new AbortController();
+    latestOptimizedResumeRequest.current = controller;
+
     try {
-      const res = await axios.get(ServerUrl + '/api/career/optimized-resume', { withCredentials: true });
-      if (res.data.data) {
+      const res = await axios.get(ServerUrl + '/api/career/optimized-resume', {
+        withCredentials: true,
+        signal: controller.signal,
+      });
+      if (!controller.signal.aborted && res.data.data) {
         setOptimizedResume(res.data.data);
       }
     } catch (err) {
-      console.warn("Failed to fetch optimized resume:", err.message);
+      if (!axios.isCancel(err)) {
+        console.warn("Failed to fetch optimized resume:", err.message);
+      }
+    } finally {
+      if (latestOptimizedResumeRequest.current === controller) {
+        latestOptimizedResumeRequest.current = null;
+      }
     }
   }, []);
 
@@ -95,6 +123,11 @@ const CareerHub = () => {
     fetchPrepPlan();
     fetchLatestMatch();
     fetchLatestOptimizedResume();
+
+    return () => {
+      latestMatchRequest.current?.abort();
+      latestOptimizedResumeRequest.current?.abort();
+    };
   }, [fetchSkillGraph, fetchPrepPlan, fetchLatestMatch, fetchLatestOptimizedResume]);
 
   const handleResumeUpload = async () => {
@@ -103,6 +136,8 @@ const CareerHub = () => {
     setError('');
 
     // Clear stored target job description, previous match, and previous optimized resume
+    latestMatchRequest.current?.abort();
+    latestOptimizedResumeRequest.current?.abort();
     setJobData(null);
     setJdText('');
     setMatchData(null);

@@ -193,9 +193,9 @@ export const finishInterview = async (req, res) => {
       timeTaken: q.timeTaken || 0,
       score: q.evaluation?.finalScore ?? q.score ?? 0,
       feedback: q.evaluation?.feedback ?? q.feedback ?? "",
-      confidence: q.evaluation?.confidence ?? q.confidence ?? (q.evaluation?.finalScore ?? 0),
-      communication: q.evaluation?.communication ?? q.communication ?? (q.evaluation?.finalScore ?? 0),
-      correctness: q.evaluation?.accuracy ?? q.correctness ?? (q.evaluation?.finalScore ?? 0),
+      confidence: q.evaluation?.confidence ?? q.confidence ?? (q.evaluation?.finalScore ?? q.score ?? 0),
+      communication: q.evaluation?.communication ?? q.communication ?? (q.evaluation?.finalScore ?? q.score ?? 0),
+      correctness: q.evaluation?.accuracy ?? q.correctness ?? (q.evaluation?.finalScore ?? q.score ?? 0),
       evaluation: q.evaluation
     }));
 
@@ -253,9 +253,9 @@ export const getInterviewReport = async (req, res) => {
       timeTaken: q.timeTaken || 0,
       score: q.evaluation?.finalScore ?? q.score ?? 0,
       feedback: q.evaluation?.feedback ?? q.feedback ?? "",
-      confidence: q.evaluation?.confidence ?? q.confidence ?? (q.evaluation?.finalScore ?? 0),
-      communication: q.evaluation?.communication ?? q.communication ?? (q.evaluation?.finalScore ?? 0),
-      correctness: q.evaluation?.accuracy ?? q.correctness ?? (q.evaluation?.finalScore ?? 0),
+      confidence: q.evaluation?.confidence ?? q.confidence ?? (q.evaluation?.finalScore ?? q.score ?? 0),
+      communication: q.evaluation?.communication ?? q.communication ?? (q.evaluation?.finalScore ?? q.score ?? 0),
+      correctness: q.evaluation?.accuracy ?? q.correctness ?? (q.evaluation?.finalScore ?? q.score ?? 0),
       evaluation: q.evaluation
     }));
 

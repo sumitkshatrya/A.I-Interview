@@ -1,6 +1,7 @@
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
+import { randomUUID } from 'crypto';
 
 // Ensure upload directory exists
 const uploadDir = 'public';
@@ -17,7 +18,7 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const sanitizedOriginal = path.basename(file.originalname).replace(/[^a-zA-Z0-9.-]/g, '_');
-    const filename = `${Date.now()}-${sanitizedOriginal}`;
+    const filename = `${Date.now()}-${randomUUID()}-${sanitizedOriginal}`;
     cb(null, filename);
   },
 });
